@@ -124,11 +124,10 @@ If you have overwritten *cmdline.txt* on the boot partition with another version
 
 * find the disk UUID, 4 bytes at offset 0x1b8 from the start of the SD card or .img, with a command like
 
-      ```
-      sudo dd if=/dev/disk2 bs=4 skip=110 count=1 | hexdump
-      ```
-      
-      which would display its result as `00000000  57 4a 2e 40` (example value, for 2017-04-10-raspbian-jessie).
+```
+sudo dd if=/dev/disk2 bs=4 skip=110 count=1 | hexdump
+```
+  which would display its result as `00000000  57 4a 2e 40` (example value, for 2017-04-10-raspbian-jessie).
 * take the four bytes in reverse order (it is a little-endian system), append `-02` for the root partition, and put the result in *cmdline.txt* in the form `root=PARTUUID=402e4a57-02`
 
 ## References

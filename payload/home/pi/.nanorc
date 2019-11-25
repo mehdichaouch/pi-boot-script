@@ -1,0 +1,68 @@
+# ~/.nanorc
+# Settings for nano
+# These settings override the global settings in /etc/nanorc
+# The settings are in turn overridden by command-line options,
+# so as we have defined nano as an alias to nano -iFmzAc, we
+# have expressed a preference for:
+#   i - auto-indent
+#   F - enable multiple file buffers (more than one open file)
+#   m - mouse support: mouseclick can move cursor and execute shortcuts
+#   z - enable suspend ability
+#   A - smart Home key (jumps to start of text)
+#   c - constantly show cursor position in status bar
+# Colors: [foreground,background] white, black, blue, green, red, cyan, yellow, magenta,
+# and normal -- where normal  means the  default  foreground or background color. 
+# The name of the foreground color may be prefixed with bright (≈ bold)
+
+## Reverse settings in the system-wide settings /etc/nanorc
+# Text wrapping in the editor. NB this means hard-wrapping! It inserts newlines.
+# unset nowrap
+
+
+## Application
+# Allow more than one document open at once
+set multibuffer
+
+# Allow nano to be suspended to background
+set suspend
+
+
+## User interface
+# show the cursor position in the status bar (nano < 3.0: set const)
+set constantshow
+
+# Allow the mouse to move the cursor and click menu items
+set mouse
+
+# Let the Home button (fn+left) go to start of text on the line
+set smarthome
+
+# Show line numbers
+set linenumbers
+set numbercolor black,cyan
+
+# Soft-wrapping, at spaces/tabs
+set softwrap
+set atblanks
+
+
+## Editing
+# auto-indentation
+set autoindent
+
+# Tab-size at 4 spaces
+set tabsize 4
+
+# hard-wrapping a few characters before end of line (default: 8)
+# set fill -2
+
+# Don't convert Windows line-endings when opening
+set noconvert
+
+# Make search RegEx by default
+set regexp
+
+## Syntax highlighting
+# Include syntax files that help with syntax highlighting
+# include "sysntaxfile"
+

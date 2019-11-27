@@ -41,7 +41,7 @@ set smarthome
 set linenumbers
 set numbercolor black,cyan
 
-# Soft-wrapping, at spaces/tabs
+# Soft-wrapping, (nano >3.0 at spaces/tabs)
 set softwrap
 set atblanks
 

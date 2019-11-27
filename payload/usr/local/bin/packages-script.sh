@@ -8,13 +8,6 @@ templog=/dev/shm/$logfile
 log() {
 	echo "$@" >> $templog;
 }
-endscript() {
-	# Append to the log on the boot partition 
-	echo >> /boot/$logfile
-	date >> /boot/$logfile
-	cat $templog >> /boot/$logfile
-	reboot
-}
 log "Unattended package installation by $0";
 exec 2>>$templog;	# log all errors
 
@@ -53,5 +46,9 @@ if [[ $PACKAGES_TO_INSTALL ]]; then
 	apt-get install -y "${PACKAGES_TO_INSTALL[@]}" && log OK || log FAILED;
 fi;
 
+# Append to the log on the boot partition 
+echo >> /boot/$logfile
+date >> /boot/$logfile
+cat $templog >> /boot/$logfile
+reboot
 
-endscript

@@ -96,7 +96,7 @@ I'm not sure what kind of trash Windows puts in.
 The scripts write log messages to */boot/configuration.log*.
 The script *one-time-script.sh* in its current form does the following:
 
-* create and format an additional FAT32 partition, configuring it to be owned by the user *pi* for writing application logs etc.
+* create and format an additional FAT32 partition, configuring it to be owned by the user *pi* for writing application logs etc. (NB don't use this part on Raspbian Stretch (9) and earlier)
 * make the Linux partition take up the remaining space on the card
 * set hidden files in /home/pi (if any were moved there) as non-executable, and SSH public keys as private
 * set the timezone

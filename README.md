@@ -44,7 +44,7 @@ to change the hostname of the Pi.
 ### 2. Medium: copy files over to the Linux partition
 To do this, you can leave the *unattended* file unchanged; it was written for this task.
 
-1. Put all the files in a directory *payload/* in a subdirectory equivalent to where they will be on the Pi:
+1. Put your files in a directory *payload/* in a subdirectory equivalent to where they will be on the Pi:
     * a file *payload/etc/hosts* will become */etc/hosts* on the Pi (yes, this overwrites it if it is already there)
     * *payload/home/pi/.bashrc* will become */home/pi/.bashrc* in the user profile
 2. Put the *payload/* folder in the boot partition
@@ -98,7 +98,7 @@ The script ***one-time-script.sh*** gets some configuration values from */boot/o
 * make the Linux (root) partition take up the remaining space on the card
 * set file permissions for hidden files in /home/pi (if any were moved there) as non-executable, and for SSH public keys as private
 * set the timezone
-* set the hostname, based on the hardware generation and CPU serial number: a Pi 3 with serial 2c45df gets hostname *pi3-2c45df*. Or if NEW\_HOSTNAME\_COMPANY was set to *enron*, the hostname becomes *pi3-enron-2c45df*
+* set the hostname, based on the hardware generation and CPU serial number: a Pi 3 with serial 2c45df gets hostname *pi3-2c45df*. Or if new\_hostname\_tag was set to *basement*, the hostname becomes *pi3-basement-2c45df*
 * turn SSH on
 * set the WIFi country
 * solve a locale-mixing problem for SSH logins (warnings like `locale: Cannot set LC_CTYPE to default locale: No such file or directory` when you open a manpage or install a package)

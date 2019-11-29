@@ -3,27 +3,38 @@
 
 get_parameters() {
 	# first the default values...
-	NEW_PARTITION_SIZE_MB=288
-	NEW_PARTITION_LABEL='config'
-	NEW_LOCALE='en_GB.UTF-8'
-	NEW_TIMEZONE='Europe/Amsterdam'
-	NEW_HOSTNAME_COMPANY=''
-	NEW_SSH_SETTING=0
-	NEW_WIFI_COUNTRY=NL
-	NEW_WIFI_SSID="Our network"
-	NEW_WIFI_PASSWORD="Secret password"
-	NEW_BOOT_BEHAVIOUR=B1
-	NEW_SD_CARD_NUMBER=XX
-	NODE_JS_SOURCE_URL=""
-	PACKAGES_TO_INSTALL=()
+	new_partition_size_MB=288
+	new_partition_label='logs'
+	new_locale='en_GB.UTF-8'
+	new_timezone='Europe/London'
+	new_hostname_tag=''
+	new_ssh_setting=0
+	new_wifi_country=GB
+	new_wifi_ssid="Our network"
+	new_wifi_password="Secret"
+	new_boot_behaviour=B1
+	sd_card_number=XX
+	packages_to_install='()'
+	node_js_source_url=""
 
 	# ...then see if values can be read from a file
 	# then remove that (may contain password)
 	# but save parameters for the next script back to the file
-	if [[ -f /boot/one-time-script.conf ]]; then
-		source /boot/one-time-script.conf && log "Read parameters from /boot/one-time-script.conf";
-		echo "NODE_JS_SOURCE_URL='$NODE_JS_SOURCE_URL'" > /boot/one-time-script.conf;
-		echo "PACKAGES_TO_INSTALL=(${PACKAGES_TO_INSTALL[@]})" >> /boot/one-time-script.conf;
+	cfgfile='/boot/one-time-script.conf'
+	if [[ -f $cfgfile ]]; then
+		while IFS='= ' read -r lhs rhs; do
+			if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then	# skip comment-/malformed lines
+				rhs="${rhs%%\#*}"    # Del end-of-line comments
+				rhs="${rhs%"${rhs##*[^[:blank:]]}"}"  # Del trailing spaces/tabs
+				rhs="${rhs%\"}"     # Del opening double-quotes 
+				rhs="${rhs#\"}"     # Del closing double-quotes 
+				rhs="${rhs%\'}"     # Del opening single-quotes 
+				rhs="${rhs#\'}"     # Del closing single-quotes 
+				declare $lhs="$rhs"
+			fi
+		done < $cfgfile && log "Read parameters from $cfgfile";
+		echo "node_js_source_url='$node_js_source_url'" > $cfgfile;
+		echo "packages_to_install=($packages_to_install)" >> $cfgfile;
 	else
 		log "Using default parameters";
 	fi;
@@ -42,8 +53,8 @@ disk_mgt() {
 	fi
 	ROOT_PART_END=$(echo "$LAST_PARTITION" | cut -d ":" -f 3)
 	ROOT_DEV_SIZE=$(cat /sys/block/mmcblk0/size)	
-	if ((ROOT_PART_END + 2048*NEW_PARTITION_SIZE_MB >= ROOT_DEV_SIZE)); then
-		log "Not enough free space for a $NEW_PARTITION_SIZE_MB MB partition. Aborting"
+	if ((ROOT_PART_END + 2048*new_partition_size_MB >= ROOT_DEV_SIZE)); then
+		log "Not enough free space for a $new_partition_size_MB MB partition. Aborting"
 		return
 	fi
 	log -n "Create new FAT32 entry in the partition table: "
@@ -51,7 +62,7 @@ disk_mgt() {
 	n
 	p
 	3
-	$((ROOT_DEV_SIZE - 2048*NEW_PARTITION_SIZE_MB))
+	$((ROOT_DEV_SIZE - 2048*new_partition_size_MB))
 	$((ROOT_DEV_SIZE - 1))
 	t
 	3
@@ -65,16 +76,16 @@ disk_mgt() {
 
 	# format the new partition
 	log -n "Format the new partition as FAT32: "
-	mkfs.fat -F 32 -n $NEW_PARTITION_LABEL /dev/mmcblk0p3 && log OK || log FAILED;
+	mkfs.fat -F 32 -n $new_partition_label /dev/mmcblk0p3 && log OK || log FAILED;
 
 	# make sure it is owned by user pi, so it can write to it
 	log -n "Add the new partition to /etc/fstab for mounting at boot: "
 	PART_UUID=$(grep vfat /etc/fstab | sed -E 's|^(\S+)\S .*|\1|;q')3 &&\
-	echo "$PART_UUID  /$NEW_PARTITION_LABEL  vfat  defaults,uid=1000,gid=1000  0  2" >> /etc/fstab && log OK || log FAILED;
+	echo "$PART_UUID  /$new_partition_label  vfat  defaults,uid=1000,gid=1000  0  2" >> /etc/fstab && log OK || log FAILED;
 
 	# enlarge the ext4 partition and filesystem
 	log -n "Make the ext4 partition take up the remainder of the SD card: "
-	parted -m /dev/mmcblk0 u s resizepart 2 $((ROOT_DEV_SIZE-2048*NEW_PARTITION_SIZE_MB-1)) && log OK || log FAILED;
+	parted -m /dev/mmcblk0 u s resizepart 2 $((ROOT_DEV_SIZE-2048*new_partition_size_MB-1)) && log OK || log FAILED;
 	log -n "Resize the ext4 file system to take up the full partition: "
 	resize2fs /dev/mmcblk0p2 && log OK || log FAILED;
 }
@@ -97,32 +108,32 @@ user_profile() {
 # 4. OPERATING SYSTEM CONFIGURATION
 os_config() {
 	log -n "Change timezone: "
-	raspi-config nonint do_change_timezone "$NEW_TIMEZONE" && log OK || log FAILED;
+	raspi-config nonint do_change_timezone "$new_timezone" && log OK || log FAILED;
 
 	modelnr=$(sed -E 's/Raspberry Pi ([^ ]+).*/\1/' /proc/device-tree/model);
 	serial=$(grep ^Serial /proc/cpuinfo | sed -E 's/^.*: .{10}//');
-	[[ $NEW_HOSTNAME_COMPANY ]] && hname="pi$modelnr-$NEW_HOSTNAME_COMPANY-$serial" || hname="pi$modelnr-$serial";
+	[[ $new_hostname_tag ]] && hname="pi$modelnr-$new_hostname_tag-$serial" || hname="pi$modelnr-$serial";
 	log -n "Set hostname to $hname: "
 	raspi-config nonint do_hostname "$hname" && log OK || log FAILED;
 
 	log -n "Set SSH to "  # 0 = on, 1 = off
-	[[ $NEW_SSH_SETTING == 0 ]] && log -n "on: " || log -n "off: ";
-	raspi-config nonint do_ssh $NEW_SSH_SETTING && log OK || log FAILED;
+	[[ $new_ssh_setting == 0 ]] && log -n "on: " || log -n "off: ";
+	raspi-config nonint do_ssh $new_ssh_setting && log OK || log FAILED;
 
 	log -n "Set WiFi country: "
-	raspi-config nonint do_wifi_country $NEW_WIFI_COUNTRY && log OK || log FAILED;
+	raspi-config nonint do_wifi_country $new_wifi_country && log OK || log FAILED;
 
 	log -n "Set WiFi login: "
-	raspi-config nonint do_wifi_ssid_passphrase "$NEW_WIFI_SSID" "$NEW_WIFI_PASSWORD" && log OK || log FAILED;
+	raspi-config nonint do_wifi_ssid_passphrase "$new_wifi_ssid" "$new_wifi_password" && log OK || log FAILED;
 
 	log -n "Avoid language setting problems when logged in through SSH: "
 	sed -i 's/^AcceptEnv LANG LC_\*/#AcceptEnv LANG LC_*/' /etc/ssh/sshd_config && log OK || log FAILED;
 
 	log -n "Set standard boot to text console without auto-login: "
-	raspi-config nonint do_boot_behaviour $NEW_BOOT_BEHAVIOUR && log OK || log FAILED;
+	raspi-config nonint do_boot_behaviour $new_boot_behaviour && log OK || log FAILED;
 
 	log -n "Change locale: "
-	raspi-config nonint do_change_locale "$NEW_LOCALE" && log OK || log FAILED;
+	raspi-config nonint do_change_locale "$new_locale" && log OK || log FAILED;
 }
 
 # 5. WRITE SOME SYSTEM DATA TO A FILE ON /BOOT
@@ -144,7 +155,7 @@ write_card_file() {
 	if [[ -f ${cardfiles[0]} ]]; then
 		cardnr=$(sed -E 's|/boot/SD[^0-9]+([0-9]+).txt|\1|' <<<${cardfiles[0]});
 	else
-		cardnr=$NEW_SD_CARD_NUMBER;
+		cardnr=$sd_card_number;
 	fi;
 	/bin/cat > "/boot/SD-card-$cardnr.txt" <<-END
 		SD card nr $cardnr with serial number $card
@@ -178,7 +189,7 @@ systemctl enable packages-script.service && log OK || log FAILED;
 get_parameters
 
 log $'\nDISK MANAGEMENT';
-if (( $(cut /etc/debian_version -f1 -d.) >= 10 )); then
+if (( $(cut /etc/debian_version -f1 -d.) >= 10 )) && (( new_partition_size_MB > 0 )); then
 	disk_mgt
 else
 	# partitioning commands fail on Raspbian Stretch (9) and earlier;

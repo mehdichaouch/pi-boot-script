@@ -3,7 +3,7 @@
 
 get_parameters() {
 	# first the default values...
-	new_partition_size_MB=288
+	new_partition_size_MB=100
 	new_partition_label='logs'
 	new_locale='en_GB.UTF-8'
 	new_timezone='Europe/London'
@@ -14,7 +14,7 @@ get_parameters() {
 	new_wifi_password="Secret"
 	new_boot_behaviour=B1
 	sd_card_number=XX
-	packages_to_install='()'
+	packages_to_install=''
 	node_js_source_url=""
 
 	# ...then see if values can be read from a file
@@ -30,7 +30,7 @@ get_parameters() {
 				rhs="${rhs#\"}"     # Del closing double-quotes 
 				rhs="${rhs%\'}"     # Del opening single-quotes 
 				rhs="${rhs#\'}"     # Del closing single-quotes 
-				declare $lhs="$rhs"
+				declare -g $lhs="$rhs"
 			fi
 		done < $cfgfile && log "Read parameters from $cfgfile";
 		echo "node_js_source_url='$node_js_source_url'" > $cfgfile;
@@ -150,15 +150,9 @@ write_card_file() {
 		5) distr=desktop;;
 		*) distr="";;
 	esac;
-	card=$(udevadm info -a -n mmcblk0 | grep ATTRS{serial} | sed -E 's/.*x(\w{8}).*/\1/');
-	cardfiles=(/boot/SD-*);
-	if [[ -f ${cardfiles[0]} ]]; then
-		cardnr=$(sed -E 's|/boot/SD[^0-9]+([0-9]+).txt|\1|' <<<${cardfiles[0]});
-	else
-		cardnr=$sd_card_number;
-	fi;
-	/bin/cat > "/boot/SD-card-$cardnr.txt" <<-END
-		SD card nr $cardnr with serial number $card
+	card=$(cut -dx -f2 /sys/block/mmcblk0/device/serial);
+	/bin/cat > "/boot/SD-card-$sd_card_number.txt" <<-END
+		SD card nr $sd_card_number with serial number $card
 		$distro_name $distr
 		(Debian $debianv)
 		$kernel_info

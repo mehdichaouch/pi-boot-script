@@ -25,7 +25,7 @@ This requires the *unattended* file and a change to the file *cmdline.txt* on th
 2. Open the file for editing. Look at section 2: remove what is there, and put your commands there. \*
 3. Save the file and put it on the boot partition. Now open *cmdline.txt*, which is already on that partition \*\*
 4. Remove the item with `init=` (if it is there) and put the following at the end of the line:
-```ini
+```
 init=/bin/bash -c "mount -t proc proc /proc; mount -t sysfs sys /sys; mount /boot; source /boot/unattended"
 ```
 5. Save the file, eject the SD card or .img file, and you're done.
@@ -50,14 +50,14 @@ To do this, you can leave the *unattended* file unchanged; it was written for th
 2. Put the *payload/* folder in the boot partition
 3. Also put *unattended* there
 4. Open *cmdline.txt* on the boot partition, remove the item with `init=` (if it is there) and put the following at the end of the line:  
-```ini
+```
 init=/bin/bash -c "mount -t proc proc /proc; mount -t sysfs sys /sys; mount /boot; source /boot/unattended"
 ```
 5. Save the file, eject the SD card or .img file, and you're done.
 
 ### 3. Full: run configuration & installation scripts
 
-For elaborate configuration it makes sense to run a script during a 'normal' boot. The *unattended* script makes that possible. This project has two scripts for normal-boot execution:
+For elaborate configuration it makes sense to run a script during a 'normal' boot. In that case, the *unattended* script only does the preparations to make it possible. This project has two scripts for normal-boot execution:
 
 * *payload/usr/local/bin/one-time-script.sh* for configuration
 * *payload/usr/local/bin/packages-script.sh* for installation of packages, using apt-get.
@@ -71,7 +71,7 @@ The way to proceed, after downloading the project, is:
     * *one-time-script.conf* (if you made any changes to it)
     * the *payload* folder with the scripts and all the other things you want to put on the Pi
 4. Open *cmdline.txt* on the boot partition, remove the item with `init=` (if it is there) and put the following at the end of the line:  
-```ini
+```
 init=/bin/bash -c "mount -t proc proc /proc; mount -t sysfs sys /sys; mount /boot; source /boot/unattended"
 ```
 5. Eject the SD card or .img file \*\*\*
@@ -92,7 +92,7 @@ I'm not sure what kind of trash Windows puts in.
 #### What the scripts do
 The scripts write log messages to */boot/configuration.log*.
 
-The script ***one-time-script.sh*** gets some configuration values from */boot/one-time-script.conf* and does the following:
+The script ***one-time-script.sh*** runs during the reboot at the end of the *unattended* script. It reads optional configuration parameters from */boot/one-time-script.conf* and does the following:
 
 * create and format an additional FAT32 partition, configuring it to be owned by the user *pi* for writing application logs etc. (This part is disabled for Raspbian Stretch (9) and earlier because it didn't work there.)
 * make the Linux (root) partition take up the remaining space on the card

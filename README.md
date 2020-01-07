@@ -120,17 +120,17 @@ You probably wouldn't do this sort of thing to an SD card that holds all your mo
 
 If you have overwritten *cmdline.txt* on the boot partition with another version and the Pi doesn't boot from that card, copy the original cmdline.txt from the *.img* file. Or if you don't have that, correct the partition UUID in cmdline.txt:
 
-* find the disk's UUID for partitions (distinct from 'disk UUID' and 'filesystem UUID'), 4 bytes in little-endian order at offset 0x1b8 from the start of the SD card or .img, with a command like
+* find the disk's UUID for partitions (distinct from 'disk UUID' and 'filesystem UUID'), a 32-bit integer saved in little-endian order at offset 0x1b8 from the start of the SD card or .img, with a command like
 
 ```
 sudo dd if=/dev/disk2 bs=4 skip=110 count=1 | hexdump -e '1/4 "%02x"'
 ```
-which emits the four bytes in hexadecimal notation, like `402e4a57` (example value, for 2017-04-10-raspbian-jessie).
+which emits the integer in hexadecimal notation, like `402e4a57` (example value, for 2017-04-10-raspbian-jessie).
 
 * append `-02` for the root partition, and put the result in *cmdline.txt* in the form `root=PARTUUID=402e4a57-02`
 
 ## References
-I first described this at [StackExchange](https://raspberrypi.stackexchange.com/a/105534/94485) and the [Raspberry Pi Forums](https://www.raspberrypi.org/forums/viewtopic.php?p=1567588#p1567588). Some inspiration has come from Raspbian's built-in [partition resizing script](https://github.com/RPi-Distro/raspi-config/blob/master/init_resize.sh), in particular the mounting commands that make the script run.
+I first described this at [StackExchange](https://raspberrypi.stackexchange.com/a/105534/94485) and the [Raspberry Pi Forums](https://www.raspberrypi.org/forums/viewtopic.php?p=1567588#p1567588). Some inspiration has come from Raspbian's built-in [partition resizing script](https://github.com/RPi-Distro/raspi-config/blob/master/usr/lib/raspi-config/init_resize.sh), in particular the mounting commands that make the script run.
 
 
 

@@ -23,7 +23,7 @@ packages_to_install=()
 # stop this service from running at boot again
 log -n "Remove automatic running of package installation script: ";
 systemctl disable packages-script.service && log OK || log FAILED;
-
+systemctl disable systemd-time-wait-sync
 
 # 6. PACKAGE INSTALLATION
 log $'\nPACKAGE INSTALLATION';

@@ -1,6 +1,7 @@
 [Unit]
 Description=Unattended package installation on the Pi
 Requires=network-online.target
+Requires=time-sync.target
 After=network-online.target
 
 [Install]

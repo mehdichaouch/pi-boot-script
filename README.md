@@ -39,7 +39,7 @@ to change the hostname of the Pi.
 
 \* when your commands run, the PATH is `/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:.`; the working directory is `/`; the entire Linux partition is available; systemd isn't up yet so there are no services, the network is unavailable, and the system thinks it's January 1st, 1970.
 
-\*\* the [cmdline.txt](./cmdline.txt) in this project is from Raspbian Buster Lite 26-9-2019. If you happen to have that version, you can drop my cmdline.txt in.
+\*\* the [cmdline.txt](./cmdline.txt) in this project is from Raspbian Buster Lite 2020-02-13. If you happen to have that version, you can drop my cmdline.txt in.
 
 ### 2. Medium: copy files over to the Linux partition
 To do this, you can leave the *unattended* file unchanged; it was written for this task.

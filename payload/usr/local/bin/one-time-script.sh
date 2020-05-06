@@ -178,6 +178,8 @@ systemctl disable one-time-script.service && log OK || log FAILED;
 # prepare for the package installation script to run on the next boot
 log -n "Set up automatic running of package installation script: ";
 systemctl enable packages-script.service && log OK || log FAILED;
+# make sure it runs only after time synchronization (to avoid apt update errors)
+systemctl enable systemd-time-wait-sync && log OK || log FAILED;
 
 
 get_parameters

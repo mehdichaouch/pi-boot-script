@@ -49,7 +49,7 @@ To do this, you can leave the *unattended* file unchanged; it was written for th
     * *payload/home/pi/.bashrc* will become */home/pi/.bashrc* in the user profile
 2. Put the *payload/* folder in the boot partition
 3. Also put *unattended* there
-4. Open *cmdline.txt* on the boot partition, remove the item with `init=` (if it is there) and put the following at the end of the line:  
+4. Open *cmdline.txt* on the boot partition, remove the item with `init=` (if it is there) and put the following at the end of the line:
 ```
 init=/bin/bash -c "mount -t proc proc /proc; mount -t sysfs sys /sys; mount /boot; source /boot/unattended"
 ```
@@ -70,7 +70,7 @@ The way to proceed, after downloading the project, is:
     * *unattended*
     * *one-time-script.conf* (if you made any changes to it)
     * the *payload* folder with the scripts and all the other things you want to put on the Pi
-4. Open *cmdline.txt* on the boot partition, remove the item with `init=` (if it is there) and put the following at the end of the line:  
+4. Open *cmdline.txt* on the boot partition, remove the item with `init=` (if it is there) and put the following at the end of the line:
 ```
 init=/bin/bash -c "mount -t proc proc /proc; mount -t sysfs sys /sys; mount /boot; source /boot/unattended"
 ```
@@ -132,5 +132,7 @@ which emits the integer in hexadecimal notation, like `402e4a57` (example value,
 ## References
 I first described this at [StackExchange](https://raspberrypi.stackexchange.com/a/105534/94485) and the [Raspberry Pi Forums](https://www.raspberrypi.org/forums/viewtopic.php?p=1567588#p1567588). Some inspiration has come from Raspbian's built-in [partition resizing script](https://github.com/RPi-Distro/raspi-config/blob/master/usr/lib/raspi-config/init_resize.sh), in particular the mounting commands that make the script run.
 
+## Thanks to & Inspired by
+Thanks to [Jim Danner's](https://gitlab.com/JimDanner/pi-boot-script) original repository.
 
-
+Inspired from [mizraith/pi-boot-script](https://github.com/mizraith/pi-boot-script).

@@ -5,6 +5,8 @@ get_parameters() {
 	# first the default values...
 	new_partition_size_MB=100
 	new_partition_label='logs'
+	new_password='raspberry'
+	new_keyboard='us'
 	new_locale='en_GB.UTF-8'
 	new_timezone='Europe/London'
 	new_hostname_tag=''
@@ -26,10 +28,10 @@ get_parameters() {
 			if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then	# skip comment-/malformed lines
 				rhs="${rhs%%\#*}"    # Del end-of-line comments
 				rhs="${rhs%"${rhs##*[^[:blank:]]}"}"  # Del trailing spaces/tabs
-				rhs="${rhs%\"}"     # Del opening double-quotes 
-				rhs="${rhs#\"}"     # Del closing double-quotes 
-				rhs="${rhs%\'}"     # Del opening single-quotes 
-				rhs="${rhs#\'}"     # Del closing single-quotes 
+				rhs="${rhs%\"}"     # Del opening double-quotes
+				rhs="${rhs#\"}"     # Del closing double-quotes
+				rhs="${rhs%\'}"     # Del opening single-quotes
+				rhs="${rhs#\'}"     # Del closing single-quotes
 				declare -g $lhs="$rhs"
 			fi
 		done < $cfgfile && log "Read parameters from $cfgfile";
@@ -52,7 +54,7 @@ disk_mgt() {
 		return
 	fi
 	ROOT_PART_END=$(echo "$LAST_PARTITION" | cut -d ":" -f 3)
-	ROOT_DEV_SIZE=$(cat /sys/block/mmcblk0/size)	
+	ROOT_DEV_SIZE=$(cat /sys/block/mmcblk0/size)
 	if ((ROOT_PART_END + 2048*new_partition_size_MB >= ROOT_DEV_SIZE)); then
 		log "Not enough free space for a $new_partition_size_MB MB partition. Aborting"
 		return
@@ -134,6 +136,12 @@ os_config() {
 
 	log -n "Change locale: "
 	raspi-config nonint do_change_locale "$new_locale" && log OK || log FAILED;
+
+    log -n "Change keyboard: "
+    raspi-config nonint do_configure_keyboard "$new_keyboard" && log OK || log FAILED;
+
+	log -n "Change password: "
+	echo -e "$new_password" | passwd pi && log OK || log FAILED;
 }
 
 # 5. WRITE SOME SYSTEM DATA TO A FILE ON /BOOT
@@ -203,7 +211,7 @@ os_config
 log $'\nWRITE SOME SYSTEM DATA TO A FILE ON /BOOT';
 write_card_file
 
-# Write the log to the boot partition 
+# Write the log to the boot partition
 date > /boot/$logfile
 cat $templog >> /boot/$logfile
 
